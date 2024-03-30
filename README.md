@@ -1,13 +1,14 @@
 # COMS W3132 Individual Project
 
 ## Author
-*Your name and email goes here.*
+Jonah Singer jrs2338@columbia.edu
 
 ## Project Title
-*Provide a short and descriptive title for your project.*
+Stock Market Predictor
 
 ## Project Description
-*Write a short, concise project description of what your project aims to achieve. Include the motivation for this project (why do you want to work on it), the problem your project aims to solve, and the main goals that you want to accomplish within the rest of the semester. Also mention why you think the project might be useful or interesting to others. Keep this section short. A couple of paragraphs would do.*
+
+I want to try and make predictions of the stock market using a variety of prediction methods. Including mean reversion, linear regression, and possibly machine learning. I am interested in the intersection of computer science and finance so I would love to gain experience using Python to build financial models. This project aims to solve the problem of human error in discretionary investing. By the end of the semester, I would like to have implemented a variety of prediction methods and backtested them. This project would definitely be useful for others if it could consistently beat the stock market as it would be worth billions of dollars (This is obviously very unlikely as this is a multi-billion dollar industry). I would be happy if it were able to generate "reasonable" investment decisions. Linear regression and mean reversion implementations can be done with basic data structures. I plan to use TensorFlow for the machine learning model (I know almost nothing about machine learning but I am interested in learning).
 
 ## Timeline
 
