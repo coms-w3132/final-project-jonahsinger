@@ -1,66 +1,34 @@
-import pandas as pd
-import numpy as np
-import yfinance as yf
+from Backtester import Backtester
 
-class MeanReversionStrategy:
-    def __init__(self, tickers, start_date, end_date, amount):
-        """
-        Initialize the mean reversion strategy with specific stock tickers, date range, and investment amount.
-        :param tickers: List of stock ticker symbols.
-        :param start_date: Start date for the data in 'YYYY-MM-DD' format.
-        :param end_date: End date for the data in 'YYYY-MM-DD' format.
-        :param amount: Total amount of money to trade with.
-        """
-        self.tickers = tickers
-        self.start_date = start_date
-        self.end_date = end_date
-        self.amount = amount
-        self.data = self.download_data()
 
-    def download_data(self):
-        """
-        Download historical stock data for given tickers and timeframe using yfinance.
-        :return: DataFrame with closing prices for each ticker.
-        """
-        data = yf.download(self.tickers, start=self.start_date, end=self.end_date)
-        return data['Close']  # Focus on closing prices
+def main():
+    """Tests 2 runs of linear regression and reverse linear regression"""
+    tickers = [
+        'AAPL', 'MSFT', 'GOOGL', 'T', 'VZ', 'AMZN', 'META', 'TSLA', 'NVDA', 'INTC', 'AMD',
+        'IBM', 'CSCO', 'ORCL', 'ADBE', 'CRM', 'NFLX', 'DIS', 'PFE', 'JNJ', 'GILD', 'NKE',
+        'KO', 'PEP', 'MCD', 'WMT', 'TGT', 'COST', 'CVX', 'XOM', 'BP', 'T', 'VZ',
+        'TMUS', 'BA', 'LMT', 'NOC', 'BABA', 'JD', 'V', 'MA', 'JPM', 'GS', 'BAC', 'C',
+        'WFC', 'BLK', 'AXP', 'GE', 'GM', 'F', 'DAL', 'UAL', 'AAL', 'LUV', 'EA', 'TTWO', 'SPG',
+        'AMT', 'PLD', 'CCI', 'D', 'SO', 'XEL', 'NEE', 'GSK', 'CVS', 'WBA', 'TMO', 'ABT', 'LHX',
+        'GD', 'TXT', 'HON', 'UNH', 'MCK', 'MO', 'PM', 'STZ', 'BTI', 'CL', 'PG', 'UL', 'EL',
+        'ADM', 'ADP', 'BIIB', 'BLK', 'CAH', 'CAT', 'COP', 'DD', 'ECL', 'F', 'PFE', 'SLB', 'TXN', 'V',
+        'RTX', 'SPGI', 'LOW', 'GS', 'ISRG', 'HON', 'AXP', 'INTC', 'INTU', 'BMY', 'IBM', 'QCOM', 'GE', 'DE'
+    ]
+    start_date = '2014-10-01'
+    end_date = '2024-04-21'
+    step_size = 60  # How often linear regression is taken and stocks are bought and sold
+    amount = 10000
+    backtester = Backtester(tickers, start_date, end_date, amount)
+    backtester.run_strategy(step_size, "mean reversion")
+    backtester.portfolio_value = 10000
+    backtester.run_strategy(step_size, "reverse mean reversion")
 
-    def execute_strategy(self):
-        """
-        Execute the mean reversion strategy by analyzing price deviations from the mean, selecting stocks, and allocating trades.
-        :return: Dictionary with buy and short orders specifying amounts for each stock.
-        """
-        deviations = {}
-        for ticker in self.tickers:
-            prices = self.data[ticker].dropna()  # Ensure no NaN values
-            mean_price = np.mean(prices)
-            current_price = prices.iloc[-1]
-            deviation = (current_price - mean_price) / mean_price
-            deviations[ticker] = deviation
+    step_size = 5
+    backtester.portfolio_value = 10000
+    backtester.run_strategy(step_size, "mean reversion")
+    backtester.portfolio_value = 10000
+    backtester.run_strategy(step_size, "reverse mean reversion")
 
-        # Sort tickers based on the absolute deviation from the mean
-        sorted_tickers = sorted(deviations, key=lambda x: abs(deviations[x]), reverse=True)
-        num_stocks = len(sorted_tickers)
 
-        # Identify the cut-off for the top 10% in the sorted list
-        top_10_percent_cutoff = int(0.1 * num_stocks)
-
-        # Select top 10% for shorting and buying
-        short_stocks = sorted_tickers[:top_10_percent_cutoff]
-        buy_stocks = sorted_tickers[-top_10_percent_cutoff:]
-
-        # Allocate funds equally for buying and shorting
-        buy_amount = self.amount * 0.5
-        short_amount = self.amount * 0.5
-
-        # Allocate funds proportionally to the deviations
-        buy_deviation_sum = sum(abs(deviations[ticker]) for ticker in buy_stocks)
-        short_deviation_sum = sum(abs(deviations[ticker]) for ticker in short_stocks)
-
-        buy_orders = {ticker: (abs(deviations[ticker]) / buy_deviation_sum) * buy_amount for ticker in buy_stocks}
-        short_orders = {ticker: (abs(deviations[ticker]) / short_deviation_sum) * short_amount for ticker in short_stocks}
-
-        return {
-            'buy': buy_orders,
-            'short': short_orders
-        }
+if __name__ == "__main__":
+    main()
