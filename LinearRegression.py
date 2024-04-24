@@ -1,5 +1,5 @@
 from Backtester import Backtester
-import pandas as pd
+
 
 def main():
     """Tests 2 runs of linear regression and reverse linear regression"""
