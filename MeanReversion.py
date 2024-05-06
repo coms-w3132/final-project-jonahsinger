@@ -2,7 +2,7 @@ from Backtester import Backtester
 
 
 def main():
-    """Tests 2 runs of linear regression and reverse linear regression"""
+    """Tests 2 runs of mean reversion and reverse mean reversion"""
     tickers = [
         'AAPL', 'MSFT', 'GOOGL', 'T', 'VZ', 'AMZN', 'META', 'TSLA', 'NVDA', 'INTC', 'AMD',
         'IBM', 'CSCO', 'ORCL', 'ADBE', 'CRM', 'NFLX', 'DIS', 'PFE', 'JNJ', 'GILD', 'NKE',
@@ -16,7 +16,7 @@ def main():
     ]
     start_date = '2014-10-01'
     end_date = '2024-04-21'
-    step_size = 60  # How often linear regression is taken and stocks are bought and sold
+    step_size = 60  # How often mean reversion is taken and stocks are bought and sold
     amount = 10000
     backtester = Backtester(tickers, start_date, end_date, amount)
     backtester.run_strategy(step_size, "mean reversion")
