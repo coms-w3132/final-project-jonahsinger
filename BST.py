@@ -19,19 +19,21 @@ class BSTNode:
 
 class BST:
     def insert(self, node, key):
-        """Inserts a key into the BST."""
+        """Inserts a key into the BST and returns the root of the tree."""
+        if node is None:
+            return BSTNode(key)
         if key < node.key:
             node.left = self.insert(node.left, key)
         else:
             node.right = self.insert(node.right, key)
-
         return node
 
     def inorder_traversal(self, node, array):
         """Performs an in-order traversal of the BST and stores the result in array."""
-        self.inorder_traversal(node.left, array)
-        array.append(node.key)
-        self.inorder_traversal(node.right, array)
+        if node:
+            self.inorder_traversal(node.left, array)
+            array.append(node.key)
+            self.inorder_traversal(node.right, array)
 
     def find_median(self, root):
         """Finds the median of the BST by in-order traversal."""
