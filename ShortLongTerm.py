@@ -1,3 +1,8 @@
+"""
+Example test runs for short and long term combined strategy and reverse short and long term combined strategy
+Parameters: tickers, start_date, end_date, amount (starting cash), and step_size can be modified.
+"""
+
 from Backtester import Backtester
 
 
@@ -16,7 +21,7 @@ def main():
     ]
     start_date = '2014-10-01'
     end_date = '2024-04-21'
-    step_size = 60  # How often mean reversion is taken and stocks are bought and sold
+    step_size = 60
     amount = 10000
     backtester = Backtester(tickers, start_date, end_date, amount)
     backtester.run_strategy(step_size, "short and long term")

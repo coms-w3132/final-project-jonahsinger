@@ -1,3 +1,8 @@
+"""
+Example test runs for mean reversion strategy and reverse mean reversion strategy
+Parameters: tickers, start_date, end_date, amount (starting cash), and step_size can be modified.
+"""
+
 from Backtester import Backtester
 
 
