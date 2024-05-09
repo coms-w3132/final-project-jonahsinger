@@ -1,15 +1,18 @@
 """
-This class contains the backtester methods for the three strategies:
+This class contains the backtester methods for the four strategies:
 1. Linear Regression
 2. Mean Reversion
 3. Median Reversion with Binary Search Tree
-4. Short and long term (linear regression + mean reversion)
+4. Combined Short and long term analysis strategy with mean reversion and linear regression
 
-Each strategy generates a dictionary with keys/stocks and values/indicators
+Each strategy generates a dictionary with keys/stocks and values/indicators.
 The backtester buys and sells stocks based on the indicators that each trading
 strategy generates. The larger the magnitude of the indicator the more funds
 that are allocated to buying or selling the stock. Positive indicator indicates
-a recommended buy and negative indicates a recommended sell.
+a recommended buy and negative indicates a recommended sell. The backtester
+calculates the returns of the trades over many time steps and plots the results.
+All strategies use the real price data to generate indicators and the returns are
+calculated from the actual price movements of the stocks. Data is from yfinance.
 
 These strategies can be run and the parameters can be modified in the files:
 LinearRegression.py
@@ -33,21 +36,22 @@ class Backtester:
         self.start_date = pd.to_datetime(start_date)
         self.end_date = pd.to_datetime(end_date)
         self.amount = amount  # Starting money
-        self.data = self.get_stock_data()  # Getting price data
+        self.data = self.get_stock_data()  # Gets price data
         self.portfolio_value = self.amount
+        # Dictionaries to store indicators for each strategy
         self.previous_slopes = {}
         self.previous_mean_deviations = {}
         self.previous_median_deviations = {}
-        self.short_and_long_term = {}
+        self.previous_combined_indicators = {}
 
     def get_stock_data(self):
         """Gets data for the specified tickers in the date range from yfinance"""
         data = yf.download(self.tickers, start=self.start_date, end=self.end_date)
-        print(data['Close'].dropna(how='all'))
+        print(data['Close'].dropna(how='all'))  # prints a sample of the data
         return data['Close'].dropna(how='all')  # drops null data
 
     def run_strategy(self, step_size, strategy):
-        """Executes the trading strategy over defined period."""
+        """Executes the specified trading strategy over defined period."""
         trading_days = self.data.index
         start_idx = 0
         value_history = [(trading_days[start_idx], self.portfolio_value)]
@@ -67,14 +71,17 @@ class Backtester:
                 elif (strategy == "mean reversion") or (strategy == "reverse mean reversion"):
                     current_value, investments = self.perform_step(start_time, end_time, self.previous_mean_deviations)
                 elif (strategy == "median reversion") or (strategy == "reverse median reversion"):
-                    current_value, investments = self.perform_step(start_time, end_time, self.previous_median_deviations)
+                    current_value, investments = self.perform_step(start_time, end_time,
+                                                                   self.previous_median_deviations)
                 elif (strategy == "short and long term") or (strategy == "reverse short and long term"):
-                    current_value, investments = self.perform_step(start_time, end_time, self.short_and_long_term)
+                    current_value, investments = self.perform_step(start_time, end_time,
+                                                                   self.previous_combined_indicators)
                 else:
+                    print("Invalid strategy")
                     current_value = 0
                     investments = 0
 
-                # Print all trades and their returns
+                # Print all trades and their returns for the most recent time step
                 print(f"\nFrom {start_time.date()} to {end_time.date()}:")
                 print("Trades executed:")
                 for trade_type, orders in investments.items():
@@ -83,54 +90,41 @@ class Backtester:
                         print(f"  {ticker}: ${amount:.2f}")
                 print(f"Return after this period: ${current_value - self.portfolio_value:.2f}")
 
-                self.portfolio_value = current_value
+                self.portfolio_value = current_value  # updates portfolio value
                 if self.portfolio_value <= 0:
                     quit("Portfolio value zero or negative")
-                value_history.append((end_time, self.portfolio_value))
+                value_history.append((end_time, self.portfolio_value))  # updates value history for graphing later
 
-            # Update indicators for the next period
-            if strategy == "linear regression":
-                self.previous_slopes = {}
+            # After the step is preformed: Update indicators for the next period
+            # Dictionary mapping strategies to their respective functions, indicators, and a reverse multiplier
+            strategy_config = {
+                "linear regression": (self.linear_regression_indicator, 'previous_slopes', 1),
+                "reverse linear regression": (self.linear_regression_indicator, 'previous_slopes', -1),
+                "mean reversion": (self.mean_deviation_indicator, 'previous_mean_deviations', 1),
+                "reverse mean reversion": (self.mean_deviation_indicator, 'previous_mean_deviations', -1),
+                "median reversion": (self.median_deviation_indicator, 'previous_median_deviations', 1),
+                "reverse median reversion": (self.median_deviation_indicator, 'previous_median_deviations', -1),
+                "short and long term": (self.combined_indicator, 'previous_combined_indicators', 1),
+                "reverse short and long term": (self.combined_indicator, 'previous_combined_indicators', -1)
+            }
+
+            # Executes the strategy and updates indicators
+            if strategy in strategy_config:
+                func, attr, multiplier = strategy_config[strategy]
+                # Calculates indicators for each ticker and stores them in the appropriate attribute
+                updated_indicators = {}
                 for ticker in self.tickers:
-                    self.previous_slopes[ticker] = self.linear_regression_indicator(ticker, start_time, end_time)
+                    # Updates the indicator by calling the appropriate function
+                    # Strategy is reversed by switching sign of indicator
+                    updated_indicators[ticker] = multiplier * func(ticker, start_time, end_time)
+                setattr(self, attr, updated_indicators)
+            else:
+                print("Invalid strategy")
 
-            if strategy == "reverse linear regression":
-                self.previous_slopes = {}
-                for ticker in self.tickers:
-                    self.previous_slopes[ticker] = -self.linear_regression_indicator(ticker, start_time, end_time)
-
-            if strategy == "mean reversion":
-                self.previous_mean_deviations = {}
-                for ticker in self.tickers:
-                    self.previous_mean_deviations[ticker] = self.mean_deviation_indicator(ticker, start_time, end_time)
-
-            if strategy == "reverse mean reversion":
-                self.previous_mean_deviations = {}
-                for ticker in self.tickers:
-                    self.previous_mean_deviations[ticker] = -self.mean_deviation_indicator(ticker, start_time, end_time)
-
-            if strategy == "median reversion":
-                self.previous_median_deviations = {}
-                for ticker in self.tickers:
-                    self.previous_median_deviations[ticker] = self.median_deviation_indicator(ticker, start_time, end_time)
-
-            if strategy == "reverse median reversion":
-                self.previous_median_deviations = {}
-                for ticker in self.tickers:
-                    self.previous_median_deviations[ticker] = -self.median_deviation_indicator(ticker, start_time, end_time)
-
-            if strategy == "short and long term":
-                self.short_and_long_term = {}
-                for ticker in self.tickers:
-                    self.short_and_long_term[ticker] = self.combined_indicator(ticker, start_time, end_time)
-
-            if strategy == "reverse short and long term":
-                self.short_and_long_term = {}
-                for ticker in self.tickers:
-                    self.short_and_long_term[ticker] = -self.combined_indicator(ticker, start_time, end_time)
-
+            # Shifts to the next time step
             start_idx = end_idx + 1
 
+        # When at the end of trading days plot results
         self.plot_results(value_history, strategy, self.start_date, self.end_date, step_size)
 
     def perform_step(self, start_time, end_time, indicators):
@@ -167,7 +161,7 @@ class Backtester:
         return buy_orders, short_orders
 
     def calculate_returns(self, buy_orders, short_orders, start_time, end_time):
-        """Calculate returns from buy and short positions based on actual price changes"""
+        """Calculates returns from buy and short positions based on actual price changes"""
         end_prices = self.data.loc[end_time]
         start_prices = self.data.loc[start_time]
 
@@ -179,7 +173,7 @@ class Backtester:
         return self.portfolio_value + buy_return + short_return
 
     def linear_regression_indicator(self, ticker, start_time, end_time):
-        """Perform linear regression on stock prices to return the slope"""
+        """Performs linear regression on stock prices to return the slope"""
         prices = self.data[ticker].loc[start_time:end_time].dropna()
         if len(prices) < 2:
             return 0  # Not enough data points for a regression
@@ -188,6 +182,7 @@ class Backtester:
         model = LinearRegression()
         model.fit(x, y)
         # Slope is used as the indicator to buy or sell for linear regression positive slope = buy; negative = sell
+        # Slope is divided by last price to make indicators meaningfully comparable
         return model.coef_[0]/prices.iloc[-1]
 
     def mean_deviation_indicator(self, ticker, start_time, end_time):
@@ -198,6 +193,7 @@ class Backtester:
         mean_price = prices.mean()
         # (-Mean deviation/ mean price) is used as the indicator for mean reversion.
         # If the stock is above the mean price sell and if it is below the mean price buy
+        # The deviation is divided by mean price to make indicators meaningfully comparable
         last_price = prices.iloc[-1]
         return (mean_price - last_price) / mean_price
 
@@ -220,19 +216,25 @@ class Backtester:
 
         # (-Median deviation/ median price) is used as the indicator for median reversion.
         # If the stock is above the median price sell and if it is below the median price buy
+        # The deviation is divided by median price to make indicators meaningfully comparable
         last_price = prices.iloc[-1]
         return (median_price - last_price) / median_price
 
     def combined_indicator(self, ticker, start_time, end_time):
         """Uses the linear regression over the long term and mean deviation over the short term"""
+        # Uses last five days for mean reversion indicator
         period_for_mean = end_time - pd.Timedelta(days=5)
         mean_deviation_indicator = self.mean_deviation_indicator(ticker, period_for_mean, end_time)
+
+        # Uses the entire step size for linear regression indicator
         linear_regression_indicator = self.linear_regression_indicator(ticker, period_for_mean, end_time)
+
+        # Adds indicators together
         combined_value = mean_deviation_indicator + linear_regression_indicator
         return combined_value
 
     def plot_results(self, value_history, strategy, start_date, end_date, step_size):
-        """Plot the historical values of the portfolio over time with title."""
+        """Plot the value of the portfolio over time with appropriate title."""
         dates, values = zip(*value_history)
         plt.figure(figsize=(10, 5))
         plt.plot(dates, values, 'o-')
