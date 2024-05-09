@@ -3,7 +3,7 @@ This class contains the backtester methods for the three strategies:
 1. Linear Regression
 2. Mean Reversion
 3. Median Reversion with Binary Search Tree
-4. Neural Network -- Incomplete
+4. Short and long term (linear regression + mean reversion)
 
 Each strategy generates a dictionary with keys/stocks and values/indicators
 The backtester buys and sells stocks based on the indicators that each trading
@@ -15,7 +15,7 @@ These strategies can be run and the parameters can be modified in the files:
 LinearRegression.py
 MeanReversion.py
 MedianReversion.py
-NeuralNetwork.py
+ShortLongTerm.py
 """
 
 import yfinance as yf
@@ -38,6 +38,7 @@ class Backtester:
         self.previous_slopes = {}
         self.previous_mean_deviations = {}
         self.previous_median_deviations = {}
+        self.short_and_long_term = {}
 
     def get_stock_data(self):
         """Gets data for the specified tickers in the date range from yfinance"""
@@ -67,6 +68,8 @@ class Backtester:
                     current_value, investments = self.perform_step(start_time, end_time, self.previous_mean_deviations)
                 elif (strategy == "median reversion") or (strategy == "reverse median reversion"):
                     current_value, investments = self.perform_step(start_time, end_time, self.previous_median_deviations)
+                elif (strategy == "short and long term") or (strategy == "reverse short and long term"):
+                    current_value, investments = self.perform_step(start_time, end_time, self.short_and_long_term)
                 else:
                     current_value = 0
                     investments = 0
@@ -115,6 +118,16 @@ class Backtester:
                 self.previous_median_deviations = {}
                 for ticker in self.tickers:
                     self.previous_median_deviations[ticker] = -self.median_deviation_indicator(ticker, start_time, end_time)
+
+            if strategy == "short and long term":
+                self.short_and_long_term = {}
+                for ticker in self.tickers:
+                    self.short_and_long_term[ticker] = self.combined_indicator(ticker, start_time, end_time)
+
+            if strategy == "reverse short and long term":
+                self.short_and_long_term = {}
+                for ticker in self.tickers:
+                    self.short_and_long_term[ticker] = -self.combined_indicator(ticker, start_time, end_time)
 
             start_idx = end_idx + 1
 
@@ -175,7 +188,7 @@ class Backtester:
         model = LinearRegression()
         model.fit(x, y)
         # Slope is used as the indicator to buy or sell for linear regression positive slope = buy; negative = sell
-        return model.coef_[0]
+        return model.coef_[0]/prices.iloc[-1]
 
     def mean_deviation_indicator(self, ticker, start_time, end_time):
         """Calculate the deviation from the mean for a ticker"""
@@ -209,6 +222,14 @@ class Backtester:
         # If the stock is above the median price sell and if it is below the median price buy
         last_price = prices.iloc[-1]
         return (median_price - last_price) / median_price
+
+    def combined_indicator(self, ticker, start_time, end_time):
+        """Uses the linear regression over the long term and mean deviation over the short term"""
+        period_for_mean = end_time - pd.Timedelta(days=5)
+        mean_deviation_indicator = self.mean_deviation_indicator(ticker, period_for_mean, end_time)
+        linear_regression_indicator = self.linear_regression_indicator(ticker, period_for_mean, end_time)
+        combined_value = mean_deviation_indicator + linear_regression_indicator
+        return combined_value
 
     def plot_results(self, value_history, strategy, start_date, end_date, step_size):
         """Plot the historical values of the portfolio over time with title."""
