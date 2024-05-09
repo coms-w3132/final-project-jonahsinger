@@ -1,12 +1,12 @@
 """
 Binary search tree class for use in the median regression algorithm.
-In the average case the BST has O(logn) for each insertion and there are
-n insertions. The median method with inorder traversal is O(n) so the total average
-case run time complexity is O(nlogn) however the worst case is O(n^2)
+In the average case the BST has runtime log(n) for each insertion with a total of
+n insertions necessary. The median method with inorder traversal is O(n) so the total average
+case run time complexity is just nlogn. However, the worst case is O(n^2)
 if all the values are increasing or decreasing when building the BST
 then the insertions will each be O(n) and the total runtime will be O(n^2).
 Using a binary tree however is still better than using some other naive algorithms
-that are always O(n^2).
+that are always O(n^2) because using the BST the average case runtime is nlog(n).
 """
 
 
