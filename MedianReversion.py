@@ -2,7 +2,7 @@ from Backtester import Backtester
 
 
 def main():
-    """Tests 2 runs of mean reversion and reverse mean reversion"""
+    """Tests 2 runs of median reversion and reverse median reversion"""
     tickers = [
         'AAPL', 'MSFT', 'GOOGL', 'T', 'VZ', 'AMZN', 'META', 'TSLA', 'NVDA', 'INTC', 'AMD',
         'IBM', 'CSCO', 'ORCL', 'ADBE', 'CRM', 'NFLX', 'DIS', 'PFE', 'JNJ', 'GILD', 'NKE',
