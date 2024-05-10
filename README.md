@@ -43,30 +43,7 @@ The main trading strategy algorithms are described in the project description se
 
 
 ## Development Methodology
-*Describe the methodology you'll use to organize and progress your work.*
-
-The first step in my project will be obtaining and processing price data of stocks. I plan to get this data from the yahoo finance package in python.
-Next I will make the backtesting framework DONE
-Next I will make the linear regression algorithm DONE
-Next I will test variations of the linear regression algorithm DONE
-Next I will make the mean reversion algorithm DONE
-Next I will test variations of the mean reversion algorithm DONE
-Next I will make the machine learning algorithm
-Next I will test variations of the machine learning algorithm
-I will summerize the results and make graphs of different preformances of the algorithms
-
-I will test all the algorithms functionality with the same backtesting framework that I will construct.
-
-*First, describe your plan for developing your project. This might include how (or if) you plan to use*
-
-
-- *GitHub projects board to track progress on tasks and milestones*
-- *GitHub issues to keep track of issues or problems*
-- *Separate Git branches and/or GitHub pull requests for development*
-- *GitHub actions for automated testing or deployment pipelines*
-- *GitHub wiki for documentation and notes*
-
-*Please also describe how (if) you plan test and evaluate your project's functionality. Do you plan to test manually or automatically? Any specific testing frameworks or libraries you plan to use?*
+I will follow this basic timeline and make git commits with meaningful messages frequently to keep track of changes: The first step in my project will be obtaining and processing price data of stocks. I plan to get this data from the yahoo finance package yfinance in python. Next I will make a backtesting framework that uses a specified step size with a specific strategy. The backtester will be able to take in indicators from a specific strategy DONE, allocate funds based on the indicators DONE, calculate the returns DONE, and print and plot the results DONE. I will then focus on making the specific algorithms first the linear regression algorithm DONE. Next I will test variations of the linear regression algorithm and make sure it is executing the strategy correctly and calculating the returns correctly by manually looking at the price data and doing a by hand check on a small time frame with few stocks DONE. Next I will make the mean reversion algorithm and check that it is working properly DONE. Next I will test variations of the mean reversion algorithm DONE. Next I will make the median reversion algorithm with a binary search tree DONE and test variations of the median reversion algorithm DONE. Lastly I made a combined strategy that uses the mean reversion and linear regression strategies. It is important that during the development the backtester is compatible with all strategies to avoid repetitive code. Functions were made make the code organized and comments ensure that the control flow is clear if there is a need to modify parts of the code. The strategies were tested using the backtester and by manually ensuring that the proper trades and returns were made by checking the printed trades and returns.
 
 ## Potential Challenges and Roadblocks
 *Identify any potential challenges or roadblocks you anticipate facing during the development of your project. For each challenge, propose strategies or solutions you might use to overcome them, which may include getting help from the TAs/instructor. This could include technical hurdles or learning new technologies.*
