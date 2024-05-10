@@ -46,14 +46,23 @@ The main trading strategy algorithms are described in the project description se
 I will follow this basic timeline and make git commits with meaningful messages frequently to keep track of changes: The first step in my project will be obtaining and processing price data of stocks. I plan to get this data from the yahoo finance package yfinance in python. Next I will make a backtesting framework that uses a specified step size with a specific strategy. The backtester will be able to take in indicators from a specific strategy DONE, allocate funds based on the indicators DONE, calculate the returns DONE, and print and plot the results DONE. I will then focus on making the specific algorithms first the linear regression algorithm DONE. Next I will test variations of the linear regression algorithm and make sure it is executing the strategy correctly and calculating the returns correctly by manually looking at the price data and doing a by hand check on a small time frame with few stocks DONE. Next I will make the mean reversion algorithm and check that it is working properly DONE. Next I will test variations of the mean reversion algorithm DONE. Next I will make the median reversion algorithm with a binary search tree DONE and test variations of the median reversion algorithm DONE. Lastly I made a combined strategy that uses the mean reversion and linear regression strategies. It is important that during the development the backtester is compatible with all strategies to avoid repetitive code. Functions were made make the code organized and comments ensure that the control flow is clear if there is a need to modify parts of the code. The strategies were tested using the backtester and by manually ensuring that the proper trades and returns were made by checking the printed trades and returns.
 
 ## Potential Challenges and Roadblocks
-*Identify any potential challenges or roadblocks you anticipate facing during the development of your project. For each challenge, propose strategies or solutions you might use to overcome them, which may include getting help from the TAs/instructor. This could include technical hurdles or learning new technologies.*
 
-I think the hardest parts will be making an interface where I can back test algorithms and making the machine learning algorithm.
-Missing stock data.
-I do not know anything about machine learning yet so I will need to watch tutorials and read up on how to make a nueral network.
+I think the hardest parts will be making an interface where I can back test algorithms. This will be difficult because the backtester will need to be compatible across all strategies. I plan to do this by incremental development making sure each method in the backtester works correctly. I also plan to create a system of indicators so that the backtester can make trades based on the indicators and the only difference between trading strategies is the generation of the indicators. 
+
+Missing stock data will likely be a large problem. I will solve this by first cleaning the data and dealing with any trading days that the market was not open and any times where a day is missing in the stock data for any stock. This is crucial to do when reading in the data so that the algorithms can work correctly.
+
+The last challenge I expect will be using data structures to reduce the runtime of the strategies. I plan to do this with trees and I also plan to use pandas and numpy. I will refer to lectures and TA’s for help with this.
+
 
 ## Additional Resources
-*Include any additional resources, tutorials, or documentation that will be helpful for this project.*
+
+Make sure all files are in the same folder before running.
+The libraries needed to run the strategies are:
+yfinance, pandas, LinearRegression from sklearn.linear_model, numpy, matplotlib.pyplot, and heapq.
+These can be installed using pip install
+The backtester class can be run from the LinearRegression.py, MeanReversion.py, MedianReversion.py and ShortLongTerm.py
+files, where the parameters for each method can be changed.
+
 
 ## Conclusion and Future Work
 *Wrap up your project description with any final thoughts, expectations, or goals not covered in the sections above. Also briefly discuss potential future work, i.e., what could be done next to improve the project.*
